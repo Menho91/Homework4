@@ -37,6 +37,38 @@ public:
             cout << "- " << books[i].title << " by " << books[i].author << endl;
         }
     }
+
+    // 책 정보 string 변환 메서드
+    string infoBook(const Book& book)
+    {
+        return book.title + " by " + book.author;
+    }
+
+    // 제목으로 책 검색 메서드
+    void searchByTitle(const string& title)
+    {
+        for (vector<Book>::iterator it = books.begin(); it != books.end(); it++)
+        {
+            if (it->title == title)
+            {
+                cout << "검색 결과: " << infoBook(*it) << endl;
+            }
+        }
+        cout << "검색 결과가 더 이상 없습니다." << endl;
+    }
+
+    // 작가로 책 검색 메서드
+    void searchByAuthor(const string& author)
+    {
+        for (vector<Book>::iterator it = books.begin(); it != books.end(); it++)
+        {
+            if (it->author == author)
+            {
+                cout << "검색 결과: " << infoBook(*it) << endl;
+            }
+        }
+        cout << "검색 결과가 더 이상 없습니다." << endl;
+    }
 };
 
 int main() {
@@ -48,7 +80,9 @@ int main() {
         cout << "\n도서관 관리 프로그램" << endl;
         cout << "1. 책 추가" << endl; // 책 정보를 입력받아 책 목록에 추가
         cout << "2. 모든 책 출력" << endl; // 현재 책 목록에 있는 모든 책 출력
-        cout << "3. 종료" << endl; // 프로그램 종료
+        cout << "3. 제목으로 책 검색" << endl; // 현재 책 목록에 있는 책 중 제목으로 책 검색
+        cout << "4. 저자명으로 책 검색" << endl; // 현재 책 목록에 있는 책 중 저자명으로 책 검색
+        cout << "5. 종료" << endl; // 프로그램 종료
         cout << "선택: ";
 
         int choice; // 사용자의 메뉴 선택을 저장
@@ -71,7 +105,25 @@ int main() {
             manager.displayAllBooks();
         }
         else if (choice == 3) {
-            // 3번 선택: 종료
+            // 3번 선택: 제목으로 책 검색
+            // 현재 BookManager에 저장된 책 중에서 사용자가 입력한 제목을 가진 책을 검색합니다.
+            string title;
+            cout << "책 제목: ";
+            cin.ignore(); // 이전 입력의 잔여 버퍼를 제거
+            getline(cin, title); // 제목 입력 (공백 포함)
+            manager.searchByTitle(title);
+        }
+        else if (choice == 4) {
+            // 4번 선택: 저자명으로 책 검색
+            // 현재 BookManager에 저장된 책 중에서 사용자가 입력한 저자명을 가진 책을 검색합니다.
+            string author;
+            cout << "저자명: ";
+            cin.ignore(); // 이전 입력의 잔여 버퍼를 제거
+            getline(cin, author); // 제목 입력 (공백 포함)
+            manager.searchByAuthor(author);
+        }
+        else if (choice == 5) {
+            // 5번 선택: 종료
             // 프로그램을 종료하고 사용자에게 메시지를 출력합니다.
             cout << "프로그램을 종료합니다." << endl;
             break; // while 루프 종료
