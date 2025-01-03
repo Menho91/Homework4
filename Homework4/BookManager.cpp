@@ -45,56 +45,61 @@ public:
     }
 
     // 제목으로 책 검색 메서드
-    string findBookByTitle(const string& title)
+    Book* findBookByTitle(const string& title)
     {
         for (int i = 0; i < books.size(); i++)
         {
             if (books[i].title == title)
             {
                 cout << "검색 결과: " << infoBook(books[i]) << endl;
-                return books[i].title;
+                return &(books[i]);
             }
         }
         cout << "검색 결과가 없습니다." << endl;
-        return " ";
+        return nullptr;
     }
 
     // 작가로 책 검색 메서드
-    string findBookByAuthor(const string& author)
+    Book* findBookByAuthor(const string& author)
     {
         for (int i = 0; i < books.size(); i++)
         {
             if (books[i].author == author)
             {
                 cout << "검색 결과: " << infoBook(books[i]) << endl;
-                return books[i].title;
+                return &(books[i]);
             }
         }
         cout << "검색 결과가 없습니다." << endl;
-        return " ";
+        return nullptr;
+    }
+
+    Book& getLastBook()
+    {
+        return books[books.size() - 1];
     }
 };
 
 class BorrowManager
 {
 private:
-    unordered_map<string, int> stock;
+    unordered_map<Book, int> stock;
     BookManager manager;
 public:
-    BorrowManager(BookManager& bm) : manager(bm) {}
-
-    void initializeStock(const string& title, int quantity = 3)
+    BorrowManager(BookManager& manager) : manager(manager) {}
+    void initializeStock(const Book& book, int quantity = 3)
     {
-        stock[title] = quantity;
+        stock[book] = quantity;
     }
     void borrowBook(const string& title)
     {
-        if (manager.findBookByTitle(title) != " ")
+        Book* book = manager.findBookByTitle(title);
+        if (book != nullptr)
         {
-            if (stock[title] > 0)
+            if (stock[*book] > 0)
             {
-                stock[title]--;
-                cout << title << "을 대여했습니다. 남은 권 수: " << stock[title] << endl;
+                stock[*book]--;
+                cout << title << "을 대여했습니다. 남은 권 수: " << stock[*book] << endl;
             }
             else
             {
@@ -107,12 +112,13 @@ public:
     }
     void returnBook(const string& title)
     {
-        if (manager.findBookByTitle(title) != " ")
+        Book* book = manager.findBookByTitle(title);
+        if (book != nullptr)
         {
-            if (stock[title] < 3)
+            if (stock[*book] < 3)
             {
-                stock[title]++;
-                cout << title << "을 반납했습니다. 남은 권 수: " << stock[title] << endl;
+                stock[*book]++;
+                cout << title << "을 반납했습니다. 남은 권 수: " << stock[*book] << endl;
             }
             else
             {
@@ -128,7 +134,7 @@ public:
         cout << "\n현재 도서 재고 목록" << endl;
         for (auto it = stock.begin(); it != stock.end(); it++)
         {
-            cout << "- " << it->first << ": " << to_string(it->second) << "권 남음" << endl;
+            cout << "- " << it->first.title << ": " << to_string(it->second) << "권 남음" << endl;
         }
     }
 };
@@ -162,7 +168,7 @@ int main() {
             cout << "책 저자: ";
             getline(cin, author); // 저자명 입력 (공백 포함)
             bookManager.addBook(title, author); // 입력받은 책 정보를 추가
-            borrowManager.initializeStock(title);
+            borrowManager.initializeStock(bookManager.getLastBook());
         }
         else if (choice == 2) {
             // 2번 선택: 모든 책 출력
