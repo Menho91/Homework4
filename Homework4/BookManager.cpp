@@ -31,7 +31,6 @@ public:
             cout << "현재 등록된 책이 없습니다." << endl;
             return;
         }
-
         cout << "현재 도서 목록:" << endl;
         for (size_t i = 0; i < books.size(); i++) { // 일반적인 for문 사용
             cout << "- " << books[i].title << " by " << books[i].author << endl;
@@ -74,32 +73,37 @@ public:
         return nullptr;
     }
 
-    Book& getLastBook()
+    vector<Book> getBooks() const
     {
-        return books[books.size() - 1];
+        return books;
     }
 };
 
 class BorrowManager
 {
 private:
-    unordered_map<Book, int> stock;
-    BookManager manager;
+    unordered_map<string, int> stock;
 public:
-    BorrowManager(BookManager& manager) : manager(manager) {}
-    void initializeStock(const Book& book, int quantity = 3)
+    void initializeStock(Book& book, int quantity = 3)
     {
-        stock[book] = quantity;
+        if (stock.find(book.title) != stock.end())
+        {
+            return;
+        }
+        else
+        {
+            stock[book.title] = quantity;
+        }
     }
-    void borrowBook(const string& title)
+    void borrowBook(const string& title, BookManager& manager)
     {
         Book* book = manager.findBookByTitle(title);
-        if (book != nullptr)
+        if (book)
         {
-            if (stock[*book] > 0)
+            if (stock[book->title] > 0)
             {
-                stock[*book]--;
-                cout << title << "을 대여했습니다. 남은 권 수: " << stock[*book] << endl;
+                stock[book->title]--;
+                cout << book->title << "을 대여했습니다. 남은 권 수: " << stock[title] << endl;
             }
             else
             {
@@ -110,15 +114,15 @@ public:
             cout << "해당 책을 찾을 수 없습니다." << endl;
         }
     }
-    void returnBook(const string& title)
+    void returnBook(const string& title, BookManager& manager)
     {
         Book* book = manager.findBookByTitle(title);
-        if (book != nullptr)
+        if (book)
         {
-            if (stock[*book] < 3)
+            if (stock[book->title] < 3)
             {
-                stock[*book]++;
-                cout << title << "을 반납했습니다. 남은 권 수: " << stock[*book] << endl;
+                stock[book->title]++;
+                cout << book->title << "을 반납했습니다. 남은 권 수: " << stock[title] << endl;
             }
             else
             {
@@ -134,14 +138,14 @@ public:
         cout << "\n현재 도서 재고 목록" << endl;
         for (auto it = stock.begin(); it != stock.end(); it++)
         {
-            cout << "- " << it->first.title << ": " << to_string(it->second) << "권 남음" << endl;
+            cout << "- " << it->first << ": " << to_string(it->second) << "권 남음" << endl;
         }
     }
 };
 
 int main() {
     BookManager bookManager;
-    BorrowManager borrowManager(bookManager);
+    BorrowManager borrowManager;
 
     // 도서관 관리 프로그램의 기본 메뉴를 반복적으로 출력하여 사용자 입력을 처리합니다.
     // 프로그램 종료를 선택하기 전까지 계속 동작합니다.
@@ -168,7 +172,10 @@ int main() {
             cout << "책 저자: ";
             getline(cin, author); // 저자명 입력 (공백 포함)
             bookManager.addBook(title, author); // 입력받은 책 정보를 추가
-            borrowManager.initializeStock(bookManager.getLastBook());
+            for (auto book : bookManager.getBooks())  // 입력받은 책 재고를 초기화
+            {
+                borrowManager.initializeStock(book);
+            }
         }
         else if (choice == 2) {
             // 2번 선택: 모든 책 출력
@@ -218,21 +225,21 @@ int main() {
             // 4번 선택: 책 대여
             // 현재 책 목록 중 개수가 남은 책을 대여합니다.
             borrowManager.displayStock();
-            cout << "대여할 책의 제목을 입력하세요: " << endl;
+            cout << "대여할 책의 제목을 입력하세요: ";
             string title;
             cin.ignore();
             getline(cin, title); // 제목 입력 (공백 포함)
-            borrowManager.borrowBook(title);
+            borrowManager.borrowBook(title, bookManager);
         }
         else if (choice == 5) {
             // 5번 선택: 책 반납
             // 빌린 책 중 하나를 반납합니다.
             borrowManager.displayStock();
-            cout << "반납할 책의 제목을 입력하세요: " << endl;
+            cout << "반납할 책의 제목을 입력하세요: ";
             string title;
             cin.ignore();
             getline(cin, title); // 제목 입력 (공백 포함)
-            borrowManager.returnBook(title);
+            borrowManager.returnBook(title, bookManager);
         }
         else if (choice == 6) {
             // 7번 선택: 종료
